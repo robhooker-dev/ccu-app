@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🛡️ SHIELD REPORT
 ### Anonymous Two-Way Reporting System — Counter Corruption Unit (CCU)
 
@@ -204,3 +205,7 @@ Developed with assistance from Claude (Anthropic).
 ## Disclaimer
 
 This software is a prototype for demonstration and planning purposes only. It must not be used to handle real intelligence, personal data, or live reports until a full security review, penetration test, and legal compliance assessment has been completed.
+=======
+# work-projects
+Work based solutions
+>>>>>>> 84a067fb76139c6e882ca435dec4a46c3f625045
