@@ -485,7 +485,7 @@ select option{background:#191a2e}
 // ─── Main App ──────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [view, setView] = useState("landing");
+  const [view, setView] = useState(window.location.hash === "#ccu-login" ? "ccu-login" : "landing");
   const [lang, setLang] = useState("en");
   const [reports, setReports] = useState(SEED_REPORTS);
   const [broadcasts, setBroadcasts] = useState(SEED_BROADCASTS);
@@ -614,7 +614,7 @@ export default function App() {
     <header className="hdr">
       <div className="logo" onClick={() => setView("landing")}>
         <div className="logo-ic"><img src={nplogo} alt="NP Logo" style={{ height: 28, width: "auto" }} /></div>
-        SHIELD REPORT<span className="sec-tag">🔒 E2E</span>
+        <span style={{ marginLeft: 8 }}>SHIELD REPORT</span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
         <span className="ccu-b">CCU OFFICER</span>
