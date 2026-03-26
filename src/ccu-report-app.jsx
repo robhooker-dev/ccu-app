@@ -496,7 +496,8 @@ select option{background:#191a2e}
 
 export default function App() {
   const [lang, setLang] = useState("en");
-  const [view, setView] = useState("landing");
+  const isCCU = window.location.hash === '#ccu-login';
+  const [view, setView] = useState(isCCU ? "ccu-login" : "landing");
   const [reports, setReports] = useState(SEED_REPORTS);
   const [broadcasts, setBroadcasts] = useState(SEED_BROADCASTS);
   const [sel, setSel] = useState(null);
@@ -625,7 +626,6 @@ export default function App() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, maxWidth: 520, margin: "0 auto 24px" }}>
             {[
               { icon: "🛡️", title: t.reporterTitle, sub: t.reporterSub, action: () => setView("submit"), border: "var(--pr)" },
-              { icon: "🔐", title: t.ccuTitle, sub: t.ccuSub, action: () => setView("ccu-login"), border: "#f97316" },
             ].map((c, i) => (
               <div key={i} onClick={c.action} style={{ background: "var(--s1)", border: `1px solid var(--b1)`, borderRadius: 12, padding: "26px 22px", cursor: "pointer", textAlign: "left", transition: "all .2s" }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = c.border; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 28px ${c.border}22`; }}
