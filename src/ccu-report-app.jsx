@@ -624,7 +624,7 @@ export default function App() {
             <div style={{ fontSize: 14, color: "var(--t2)", letterSpacing: ".04em", marginBottom: 12 }}>{t.tagline}</div>
             <div style={{ fontSize: 13, color: "var(--t3)", marginBottom: 40 }}>{t.chooseRole}</div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, maxWidth: 520, margin: "0 auto 24px" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 16, maxWidth: 520, margin: "0 auto 24px" }}>
             {[
               { icon: "🛡️", title: t.reporterTitle, sub: t.reporterSub, action: () => setView("submit"), border: "var(--pr)" },
             ].map((c, i) => (
