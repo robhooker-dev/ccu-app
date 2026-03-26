@@ -810,7 +810,6 @@ export default function App() {
       <header className="hdr"><div className="logo" onClick={() => setView("landing")}><img src={nplogo} alt="np logo" style={{ height: 28, width: "auto" }} />SHIELD REPORT<span className="sec-tag">🔒 E2E</span></div><div className="ver">v2.4.1</div></header>
       <main className="main">
         <div className="page" style={{ maxWidth: 400 }}>
-          <button className="back" onClick={() => setView("landing")}>← {t.back}</button>
           <div style={{ display: "flex", alignItems: "center", gap: 13, marginBottom: 26 }}>
             <div style={{ width: 42, height: 42, background: "rgba(249,115,22,.12)", border: "1px solid rgba(249,115,22,.28)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>🔐</div>
             <div>
