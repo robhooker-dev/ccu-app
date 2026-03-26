@@ -1,5 +1,10 @@
 import nplogo from './np-logo.png';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+useEffect(() => {
+  if (window.location.hash === '#ccu-login') {
+    setView("ccu-login");
+  }
+}, []);
 // ─── Data & Config ─────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
@@ -495,9 +500,7 @@ select option{background:#191a2e}
 // ─── Main App ──────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [view, setView] = useState(() => {
-    return window.location.hash === '#ccu-login' ? "ccu-login" : "landing";
-  });
+  const [view, setView] = useState("landing");
   const [lang, setLang] = useState("en");
   const [reports, setReports] = useState(SEED_REPORTS);
   const [broadcasts, setBroadcasts] = useState(SEED_BROADCASTS);
