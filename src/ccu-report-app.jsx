@@ -495,9 +495,10 @@ select option{background:#191a2e}
 // ─── Main App ──────────────────────────────────────────────────────────────────
 
 export default function App() {
+  const [view, setView] = useState(() => {
+    return window.location.hash === '#ccu-login' ? "ccu-login" : "landing";
+  });
   const [lang, setLang] = useState("en");
-  const isCCU = window.location.hash === '#ccu-login';
-  const [view, setView] = useState(isCCU ? "ccu-login" : "landing");
   const [reports, setReports] = useState(SEED_REPORTS);
   const [broadcasts, setBroadcasts] = useState(SEED_BROADCASTS);
   const [sel, setSel] = useState(null);
