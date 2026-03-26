@@ -614,7 +614,7 @@ export default function App() {
     <header className="hdr">
       <div className="logo" onClick={() => setView("landing")}>
         <div className="logo-ic"><img src={nplogo} alt="NP Logo" style={{ height: 28, width: "auto" }} /></div>
-        <span style={{ marginLeft: 8 }}>SHIELD REPORT</span>
+        <span style={{ marginLeft: 16}}>SHIELD REPORT</span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
         <span className="ccu-b">CCU OFFICER</span>
