@@ -507,6 +507,7 @@ export default function App() {
   const [draftMsg, setDraftMsg] = useState("");
   const [pw, setPw] = useState("");
   const [pwErr, setPwErr] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [ccuIn, setCCUIn] = useState(false);
   const [reply, setReply] = useState("");
   const [bcText, setBcText] = useState("");
