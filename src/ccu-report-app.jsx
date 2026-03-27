@@ -182,7 +182,7 @@ const ago = (d) => { const m = Math.floor((Date.now() - new Date(d)) / 60000); r
 const SEED_REPORTS = [
   {
     id: "RPT-7823-XKQP", token: "RPT-7823-XKQP",
-    timestamp: new Date(Date.now() - 7 * 86400000), category: "Bribery / Corruption",
+    timestamp: new Date(Date.now() - 7 * 86400000), category: "Theft and Fraud",
     content: "A senior officer in my unit has been accepting cash payments from a local business owner in exchange for not pursuing enforcement action. I have witnessed this personally on three separate occasions over the past two months. Meetings take place at a café near the station on Thursday evenings. The officer drives a dark blue BMW and the business owner arrives in a white van.",
     riskLevel: "HIGH", urgency: "Within 24h",
     riskReason: "Repeated financial corruption involving named officer. Direct witness evidence with specific detail. Pattern indicates ongoing criminal behaviour.",
@@ -193,7 +193,7 @@ const SEED_REPORTS = [
   },
   {
     id: "RPT-3341-BVMW", token: "RPT-3341-BVMW",
-    timestamp: new Date(Date.now() - 2 * 86400000), category: "Evidence Tampering",
+    timestamp: new Date(Date.now() - 2 * 86400000), category: "Drug and Substance Misuse",
     content: "Evidence has been removed from the custody suite. A bag of items from a drugs arrest went missing before it could be booked in. The custody sergeant appeared unconcerned when I raised it. This occurred two days ago and I am concerned further material may be at risk.",
     riskLevel: "CRITICAL", urgency: "Immediate",
     riskReason: "Active evidence tampering in custody suite. Ongoing risk to criminal proceedings. Immediate intervention required to preserve chain of custody.",
@@ -204,7 +204,7 @@ const SEED_REPORTS = [
   },
   {
     id: "RPT-9912-LRDZ", token: "RPT-9912-LRDZ",
-    timestamp: new Date(Date.now() - 14 * 86400000), category: "Misconduct / Abuse of Power",
+    timestamp: new Date(Date.now() - 14 * 86400000), category: "Unauthorised Accessing",
     content: "An officer in my team has been running PNC and intelligence checks on a former partner. I observed this on two occasions — the searches were not linked to any live investigation. This appears to be personal misuse of restricted systems.",
     riskLevel: "MEDIUM", urgency: "Within 48h",
     riskReason: "Unlawful access of police systems for personal purposes. RIPA and DPA violation. Serious misconduct but limited immediate public risk.",
@@ -219,7 +219,7 @@ const SEED_REPORTS = [
   },
   {
     id: "RPT-5577-HNQT", token: "RPT-5577-HNQT",
-    timestamp: new Date(Date.now() - 86400000), category: "Organised Crime Links",
+    timestamp: new Date(Date.now() - 86400000), category: "Organised Crime",
     content: "I have information that an officer may be leaking operational intelligence to an organised crime group. I have overheard conversations suggesting patrol patterns and forthcoming operation timings are being passed to an external contact.",
     riskLevel: "CRITICAL", urgency: "Immediate",
     riskReason: "Intelligence leakage to OCG poses immediate threat to officer safety and ongoing operations. Counter-intelligence response required urgently.",
@@ -229,7 +229,7 @@ const SEED_REPORTS = [
   },
   {
     id: "RPT-2204-YFSK", token: "RPT-2204-YFSK",
-    timestamp: new Date(Date.now() - 3 * 86400000), category: "Fraud / Financial Crime",
+    timestamp: new Date(Date.now() - 3 * 86400000), category: "Theft and Fraud",
     content: "I have noticed a pattern of inflated expense claims in my department. Several officers appear to be claiming overtime not worked and fuel costs inconsistent with deployment records. This has been happening for several months.",
     riskLevel: "MEDIUM", urgency: "Within 48h",
     riskReason: "Systematic financial fraud involving public funds. Pattern across multiple officers indicates organised misconduct rather than isolated incident.",
