@@ -519,7 +519,7 @@ export default function App() {
   const t = T[lang] || T.en;
 
   // ── AI Risk Assessment ────────────────────────────────────────────────────────
-  const assessRisk = async (content, category) => {
+  const assessRisk = async (content) => {
     setLoading(true);
     try {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -529,8 +529,8 @@ export default function App() {
           model: "claude-sonnet-4-20250514",
           max_tokens: 1000,
           system: `You are a risk assessment AI for a police counter-corruption unit. Analyse the report and respond ONLY with valid JSON, no other text:
-{"riskLevel":"CRITICAL|HIGH|MEDIUM|LOW","riskReason":"One concise sentence (max 20 words) explaining the risk level","urgency":"Immediate|Within 24h|Within 48h|Routine","keywords":["keyword1","keyword2","keyword3"]}`,
-          messages: [{ role: "user", content: `Category: ${category}\n\nReport: ${content}` }],
+{"riskLevel":"CRITICAL|HIGH|MEDIUM|LOW","riskReason":"One concise sentence (max 20 words) explaining the risk level","urgency":"Immediate|Within 24h|Within 48h|Routine","keywords":["keyword1","keyword2","keyword3"],"category":"Most appropriate single category from this list: Sexual Misconduct including APSP | Theft and Fraud | Unauthorised Accessing | Drug and Substance Misuse | Inappropriate Associations | Organised Crime | Social Media | Business Interests | Work Avoidance | Other Serious Corruption"}`,
+          messages: [{ role: "user", content: `Report: ${content}` }],
         }),
       });
       const d = await res.json();
@@ -538,13 +538,23 @@ export default function App() {
       return JSON.parse(txt);
     } catch {
       const l = content.toLowerCase();
+      const cat = l.includes("sex") || l.includes("assault") || l.includes("rape") ? "Sexual Misconduct including APSP"
+        : l.includes("theft") || l.includes("fraud") || l.includes("brib") || l.includes("stolen") ? "Theft and Fraud"
+        : l.includes("drug") || l.includes("cocaine") || l.includes("heroin") || l.includes("substance") ? "Drug and Substance Misuse"
+        : l.includes("organised crime") || l.includes("gang") || l.includes("ocg") ? "Organised Crime"
+        : l.includes("social media") || l.includes("facebook") || l.includes("twitter") || l.includes("instagram") ? "Social Media"
+        : l.includes("business") || l.includes("company") || l.includes("conflict of interest") ? "Business Interests"
+        : l.includes("unauthorised") || l.includes("accessing") || l.includes("pnc") || l.includes("system") ? "Unauthorised Accessing"
+        : l.includes("association") || l.includes("associate") ? "Inappropriate Associations"
+        : l.includes("avoid") || l.includes("absent") || l.includes("not working") ? "Work Avoidance"
+        : "Other Serious Corruption";
       if (l.includes("weapon") || l.includes("organised crime") || l.includes("intelligence leak") || l.includes("kill"))
-        return { riskLevel: "CRITICAL", riskReason: "Content indicates immediate threat requiring urgent response.", urgency: "Immediate", keywords: [] };
+        return { riskLevel: "CRITICAL", riskReason: "Content indicates immediate threat requiring urgent response.", urgency: "Immediate", keywords: [], category: cat };
       if (l.includes("brib") || l.includes("evidence") || l.includes("corrupt"))
-        return { riskLevel: "HIGH", riskReason: "Serious ongoing misconduct with potential for continued harm.", urgency: "Within 24h", keywords: [] };
+        return { riskLevel: "HIGH", riskReason: "Serious ongoing misconduct with potential for continued harm.", urgency: "Within 24h", keywords: [], category: cat };
       if (l.includes("fraud") || l.includes("misconduct") || l.includes("false"))
-        return { riskLevel: "MEDIUM", riskReason: "Misconduct requiring investigation to determine full scope.", urgency: "Within 48h", keywords: [] };
-      return { riskLevel: "LOW", riskReason: "Matter warrants review through standard internal processes.", urgency: "Routine", keywords: [] };
+        return { riskLevel: "MEDIUM", riskReason: "Misconduct requiring investigation to determine full scope.", urgency: "Within 48h", keywords: [], category: cat };
+      return { riskLevel: "LOW", riskReason: "Matter warrants review through standard internal processes.", urgency: "Routine", keywords: [], category: cat };
     } finally {
       setLoading(false);
     }
@@ -552,11 +562,11 @@ export default function App() {
 
   // ── Submit ────────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
-    if (!draft.category || draft.content.trim().length < 20) return;
+    if (draft.content.trim().length < 20) return;
     setSubmitting(true);
-    const risk = await assessRisk(draft.content, draft.category);
+    const risk = await assessRisk(draft.content);
     const token = genToken();
-    const r = { id: token, token, timestamp: new Date(), category: draft.category, content: draft.content, files: draft.files, riskLevel: risk.riskLevel, riskReason: risk.riskReason, urgency: risk.urgency, keywords: risk.keywords || [], status: "New", messages: [], broadcastOptIn: draft.optIn, language: lang };
+    const r = { id: token, token, timestamp: new Date(), category: risk.category || "Other Serious Corruption", content: draft.content, files: draft.files, riskLevel: risk.riskLevel, riskReason: risk.riskReason, urgency: risk.urgency, keywords: risk.keywords || [], status: "New", messages: [], broadcastOptIn: draft.optIn, language: lang };
     setReports(prev => [r, ...prev]);
     setNewTok(token);
     setDraft({ category: "", content: "", optIn: false });
@@ -586,6 +596,10 @@ export default function App() {
   const handleRepStatus = (id, s) => {
     setReports(prev => prev.map(r => r.id === id ? { ...r, status: s } : r));
     setSel(prev => prev ? { ...prev, status: s } : prev);
+  };
+  const handleRepCategory = (id, cat) => {
+    setReports(prev => prev.map(r => r.id === id ? { ...r, category: cat } : r));
+    setSel(prev => prev ? { ...prev, category: cat } : prev);
   };
   const handleBC = () => {
     if (!bcText.trim()) return;
@@ -655,13 +669,6 @@ export default function App() {
           <div className="priv"><span>🔒</span><span>Your identity is not recorded. This report is encrypted in transit. No IP addresses, cookies, or personal identifiers are stored or logged by this system.</span></div>
           <div className="card">
             <div className="fg">
-              <label className="lbl">{t.category} *</label>
-              <select className="sel" value={draft.category} onChange={e => setDraft(d => ({ ...d, category: e.target.value }))}>
-                <option value="">— {lang === "en" ? "Select a category" : lang === "es" ? "Seleccionar categoría" : lang === "fr" ? "Choisir une catégorie" : lang === "pl" ? "Wybierz kategorię" : "ایک قسم منتخب کریں"} —</option>
-                {CATEGORIES.map(c => <option key={c.id} value={c.label}>{c.icon} {c.label}</option>)}
-              </select>
-            </div>
-            <div className="fg">
               <label className="lbl">{t.description} *</label>
               <textarea className="ta" style={{ minHeight: 175 }} placeholder={t.descPlaceholder} value={draft.content} onChange={e => setDraft(d => ({ ...d, content: e.target.value }))} />
               <div style={{ fontSize: 10, color: draft.content.length < 20 ? "var(--am)" : "var(--t3)", marginTop: 5, fontFamily: "'JetBrains Mono',monospace" }}>
@@ -676,7 +683,7 @@ export default function App() {
           </div>
           {draftMsg && <div style={{ color: "var(--gr)", fontSize: 12, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>✓ {draftMsg}</div>}
           <div className="btn-row">
-            <button className="btn btn-p" disabled={!draft.category || draft.content.trim().length < 20 || submitting} onClick={handleSubmit}>
+            <button className="btn btn-p" disabled={draft.content.trim().length < 20 || submitting} onClick={handleSubmit}>
               {submitting ? <><div className="spin" />  {t.submitting}…</> : `🔒 ${t.submitReport}`}
             </button>
             <button className="btn btn-g" onClick={() => { setDraftMsg(t.saveDraft + " ✓"); setTimeout(() => setDraftMsg(""), 2500); }}>💾 {t.saveDraft}</button>
@@ -914,7 +921,13 @@ export default function App() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 22, flexWrap: "wrap", gap: 12 }}>
               <div>
                 <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "var(--t2)", marginBottom: 5 }}>{report.id}</div>
-                <div style={{ fontFamily: "'Calibri Condensed',Calibri", fontSize: 22, fontWeight: 800, letterSpacing: ".05em" }}>{report.category}</div>
+                <div style={{ fontFamily: "'Calibri Condensed',Calibri", fontSize: 22, fontWeight: 800, letterSpacing: ".05em", marginBottom: 6 }}>{report.category}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono',monospace", color: "var(--t3)", letterSpacing: ".05em", textTransform: "uppercase" }}>Auto-detected</span>
+                  <select style={{ fontSize: 11, padding: "3px 8px", background: "var(--s2)", border: "1px solid var(--b1)", borderRadius: 5, color: "var(--t1)", cursor: "pointer" }} value={report.category} onChange={e => handleRepCategory(report.id, e.target.value)}>
+                    {CATEGORIES.map(c => <option key={c.id} value={c.label}>{c.label}</option>)}
+                  </select>
+                </div>
               </div>
               <div style={{ display: "flex", gap: 7, flexWrap: "wrap", alignItems: "center" }}>
                 <RiskBadge level={report.riskLevel} /><StatusBadge status={report.status} />
