@@ -156,18 +156,22 @@ const T = {
   },
 };
 
+// Palette follows ccu-theme.css: teal = low/resolved, amber = medium,
+// crimson = high/critical, slate = closed/neutral. Critical and High share
+// the crimson family (this domain distinguishes them by urgency/label, not
+// by a fourth colour the shared theme doesn't define).
 const RISK_CONFIG = {
-  CRITICAL: { color: "#ef4444", bg: "rgba(239,68,68,0.12)", border: "rgba(239,68,68,0.3)", label: "CRITICAL", dot: "🔴" },
-  HIGH:     { color: "#f97316", bg: "rgba(249,115,22,0.12)", border: "rgba(249,115,22,0.3)", label: "HIGH",     dot: "🟠" },
-  MEDIUM:   { color: "#f59e0b", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.3)", label: "MEDIUM",   dot: "🟡" },
-  LOW:      { color: "#22c55e", bg: "rgba(34,197,94,0.12)",  border: "rgba(34,197,94,0.3)",  label: "LOW",      dot: "🟢" },
+  CRITICAL: { tier: "critical", color: "#8B2E2E", bg: "#F0E1E1", border: "#8B2E2E", label: "CRITICAL", dot: "🔴" },
+  HIGH:     { tier: "high",     color: "#8B2E2E", bg: "#F0E1E1", border: "#8B2E2E", label: "HIGH",     dot: "🟠" },
+  MEDIUM:   { tier: "medium",   color: "#96601F", bg: "#F3E9DC", border: "#96601F", label: "MEDIUM",   dot: "🟡" },
+  LOW:      { tier: "low",      color: "#2F6F62", bg: "#E4EEEC", border: "#2F6F62", label: "LOW",      dot: "🟢" },
 };
 
 const STATUS_COLORS = {
-  "New":          { color: "#818cf8", bg: "rgba(129,140,248,0.12)", border: "rgba(129,140,248,0.3)" },
-  "Under Review": { color: "#38bdf8", bg: "rgba(56,189,248,0.12)",  border: "rgba(56,189,248,0.3)" },
-  "Escalated":    { color: "#f97316", bg: "rgba(249,115,22,0.12)",  border: "rgba(249,115,22,0.3)" },
-  "Closed":       { color: "#6b7280", bg: "rgba(107,114,128,0.12)", border: "rgba(107,114,128,0.3)" },
+  "New":          { tier: "new" },
+  "Under Review": { tier: "review" },
+  "Escalated":    { tier: "high" },
+  "Closed":       { tier: "closed" },
 };
 
 const genToken = () => {
@@ -309,7 +313,7 @@ const FileUpload = ({ files, setFiles }) => {
 const RiskBadge = ({ level, small }) => {
   const c = RISK_CONFIG[level] || RISK_CONFIG.LOW;
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: small ? "2px 7px" : "3px 10px", borderRadius: 4, background: c.bg, border: `1px solid ${c.border}`, color: c.color, fontFamily: "'JetBrains Mono',monospace", fontSize: small ? 9 : 10, fontWeight: 700, letterSpacing: "0.06em", whiteSpace: "nowrap" }}>
+    <span className={`badge badge-${c.tier}`} style={{ fontSize: small ? 9 : 11, padding: small ? "2px 7px" : "2px 9px" }}>
       {c.dot} {c.label}
     </span>
   );
@@ -318,178 +322,194 @@ const RiskBadge = ({ level, small }) => {
 const StatusBadge = ({ status }) => {
   const c = STATUS_COLORS[status] || STATUS_COLORS["New"];
   return (
-    <span style={{ display: "inline-block", padding: "2px 9px", borderRadius: 4, background: c.bg, border: `1px solid ${c.border}`, color: c.color, fontFamily: "'JetBrains Mono',monospace", fontSize: 9, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+    <span className={`badge badge-${c.tier}`} style={{ textTransform: "uppercase" }}>
       {status}
     </span>
   );
 };
 
-const Dot = ({ color = "#22c55e" }) => (
+const Dot = ({ color = "#2F6F62" }) => (
   <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: color, animation: "pulse 2s infinite", marginRight: 5 }} />
 );
 
 // ─── Global CSS ────────────────────────────────────────────────────────────────
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Calibri+Condensed:wght@400;500;600;700;800&family=Calibri:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0b0c15;--s1:#111220;--s2:#191a2e;--s3:#20213a;
-  --b1:#252645;--b2:#32335c;
-  --t1:#e2e4f2;--t2:#8b8db8;--t3:#4e5075;
-  --pr:#5b7fff;--pr-dim:rgba(91,127,255,.12);--pr-b:rgba(91,127,255,.32);
-  --am:#f59e0b;--rd:#ef4444;--gr:#22c55e;
+  /* CCU Tools shared theme -- see ccu-tools-style-guide.md */
+  --bg:#F1F0EC;--s1:#F7F6F3;--s2:#EDEBE5;--s3:#EAE8E2;
+  --b1:#C7C2B8;--b2:#AFA89A;
+  --t1:#1B1F23;--t2:#5B6472;--t3:#7D7666;
+  --ink:#14213D;
+  --pr:#B8752A;--pr-dim:rgba(184,117,42,.10);--pr-b:rgba(184,117,42,.35);
+  --am:#96601F;--rd:#8B2E2E;--gr:#2F6F62;
+  --font-serif:'Source Serif 4',Georgia,serif;
+  --font-sans:'IBM Plex Sans',-apple-system,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono','SF Mono',Consolas,monospace;
 }
-body{background:var(--bg);color:var(--t1);font-family:'Calibri',Calibri}
-input,select,textarea{font-family:'Calibri',Calibri}
-button{font-family:'Calibri',Calibri}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+body{background:var(--bg);color:var(--t1);font-family:var(--font-sans)}
+input,select,textarea{font-family:var(--font-sans)}
+button{font-family:var(--font-sans)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.app{min-height:100vh;background:var(--bg);background-image:
-  radial-gradient(ellipse 60% 40% at 10% 15%,rgba(91,127,255,.05) 0%,transparent 70%),
-  radial-gradient(ellipse 50% 60% at 85% 80%,rgba(168,85,247,.04) 0%,transparent 70%)}
+.app{min-height:100vh;background:var(--bg)}
 .hdr{position:fixed;top:0;left:0;right:0;z-index:100;height:54px;
-  background:rgba(11,12,21,.9);backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--b1);padding:0 20px;
+  background:var(--ink);border-bottom:1px solid var(--ink);padding:0 20px;
   display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:9px;cursor:pointer;
-  font-family:'Calibri Condensed',Calibri;font-size:17px;
-  font-weight:800;letter-spacing:.12em;color:var(--t1)}
-.logo-ic{width:26px;height:26px;background:linear-gradient(135deg,#5b7fff,#818cf8);
-  border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px}
-.sec-tag{font-size:8px;font-weight:600;letter-spacing:.08em;color:var(--gr);
-  background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);
-  padding:2px 6px;border-radius:3px;font-family:'JetBrains Mono',monospace}
-.ver{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3)}
+  font-family:var(--font-serif);font-size:17px;
+  font-weight:600;color:#fff}
+.logo-ic{width:26px;height:26px;background:#fff;
+  border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.sec-tag{font-size:8px;font-weight:600;letter-spacing:.04em;color:var(--gr);
+  background:#E4EEEC;border:1px solid var(--gr);
+  padding:2px 6px;border-radius:3px;font-family:var(--font-mono)}
+.ver{font-family:var(--font-mono);font-size:9px;color:rgba(255,255,255,.5)}
+.hdr .btn-g{color:#fff;border-color:rgba(255,255,255,.3)}
+.hdr .btn-g:hover{background:rgba(255,255,255,.1)}
+.hdr .ccu-b{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:#fff}
 .main{padding-top:54px;min-height:100vh}
-.page{max-width:800px;margin:0 auto;padding:36px 20px;animation:fadein .25s ease}
-.page-w{max-width:1080px;margin:0 auto;padding:36px 20px;animation:fadein .25s ease}
+.page{max-width:800px;margin:0 auto;padding:36px 20px}
+.page-w{max-width:1080px;margin:0 auto;padding:36px 20px}
 .back{display:inline-flex;align-items:center;gap:6px;font-size:13px;
   color:var(--t2);cursor:pointer;background:none;border:none;padding:0;
   margin-bottom:22px;transition:color .15s}
 .back:hover{color:var(--t1)}
-.card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:24px;margin-bottom:18px}
-.card-t{font-family:'Calibri Condensed',Calibri;font-size:19px;font-weight:700;
-  letter-spacing:.06em;margin-bottom:18px;display:flex;align-items:center;gap:8px}
-.lbl{font-size:11px;font-weight:600;letter-spacing:.07em;color:var(--t2);
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:3px;padding:24px;margin-bottom:18px}
+.card-t{font-family:var(--font-serif);font-size:18px;font-weight:600;
+  margin-bottom:18px;display:flex;align-items:center;gap:8px;color:var(--t1)}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--t2);
   text-transform:uppercase;margin-bottom:7px;display:block}
 .fg{margin-bottom:18px}
-.inp,.sel,.ta{width:100%;background:var(--s2);border:1px solid var(--b1);
-  border-radius:8px;color:var(--t1);font-size:14px;outline:none;
-  transition:border-color .15s,box-shadow .15s}
+.inp,.sel,.ta{width:100%;background:#fff;border:1px solid var(--b1);
+  border-radius:3px;color:var(--t1);font-size:14px;outline:none;
+  transition:border-color .15s}
 .inp{padding:10px 13px}.sel{padding:10px 13px}.ta{padding:11px 13px;resize:vertical;line-height:1.6}
-.inp:focus,.sel:focus,.ta:focus{border-color:var(--pr);box-shadow:0 0 0 3px rgba(91,127,255,.1)}
-select option{background:#191a2e}
-.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;
-  border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;
-  transition:all .15s;border:none;outline:none;letter-spacing:.02em}
-.btn-p{background:var(--pr);color:#fff}.btn-p:hover{background:#4a6ef0;transform:translateY(-1px)}
-.btn-p:disabled{opacity:.45;cursor:not-allowed;transform:none}
-.btn-g{background:transparent;color:var(--t2);border:1px solid var(--b1)}
-.btn-g:hover{border-color:var(--b2);color:var(--t1)}
-.btn-d{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.28)}
-.btn-a{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.28)}
-.btn-s{background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.25)}
+.inp:focus,.sel:focus,.ta:focus{border-color:var(--pr)}
+select option{background:#fff}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;
+  border-radius:3px;font-size:13px;font-weight:500;cursor:pointer;
+  transition:background .15s;border:1px solid transparent;outline:none}
+.btn-p{background:var(--pr);color:#fff}.btn-p:hover{background:var(--am)}
+.btn-p:disabled{opacity:.45;cursor:not-allowed}
+.btn-g{background:transparent;color:var(--t1);border:1px solid var(--b1)}
+.btn-g:hover{background:var(--s2)}
+.btn-d{background:#F0E1E1;color:var(--rd);border:1px solid var(--rd)}
+.btn-a{background:#F3E9DC;color:var(--am);border:1px solid var(--am)}
+.btn-s{background:#E4EEEC;color:var(--gr);border:1px solid var(--gr)}
 .btn-row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-.token-box{background:var(--s3);border:1px solid var(--pr-b);border-radius:10px;
+.token-box{background:var(--s3);border:1px solid var(--b1);border-radius:3px;
   padding:22px 24px;text-align:center;margin:18px 0}
-.token-v{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;
-  color:var(--pr);letter-spacing:.14em;margin-bottom:8px}
+.token-v{font-family:var(--font-mono);font-size:26px;font-weight:600;
+  color:var(--pr);letter-spacing:.08em;margin-bottom:8px}
 .token-n{font-size:12px;color:var(--t2);line-height:1.5}
-.priv{background:rgba(91,127,255,.07);border:1px solid rgba(91,127,255,.18);
-  border-radius:8px;padding:11px 15px;font-size:12px;color:var(--t2);
+.priv{background:var(--s2);border:1px solid var(--b1);
+  border-radius:3px;padding:11px 15px;font-size:12px;color:var(--t2);
   line-height:1.55;margin-bottom:18px;display:flex;gap:9px;align-items:flex-start}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
 @media(max-width:550px){.stats{grid-template-columns:1fr 1fr}}
-.stat{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:16px 18px}
-.stat-v{font-family:'Calibri Condensed',Calibri;font-size:38px;font-weight:800;line-height:1;margin-bottom:3px}
-.stat-l{font-size:10px;letter-spacing:.06em;color:var(--t2);text-transform:uppercase;font-weight:600}
-.rl{display:flex;flex-direction:column;gap:9px}
-.rr{background:var(--s1);border:1px solid var(--b1);border-radius:10px;
+.stat{background:var(--s1);border:1px solid var(--b1);border-radius:3px;padding:16px 18px}
+.stat-v{font-family:var(--font-serif);font-size:32px;font-weight:600;line-height:1;margin-bottom:3px}
+.stat-l{font-size:10px;letter-spacing:.04em;color:var(--t2);text-transform:uppercase;font-weight:600}
+.rl{display:flex;flex-direction:column;gap:0}
+.rr{background:var(--s1);border:1px solid var(--b1);border-top:none;
   padding:14px 17px;display:grid;gap:13px;
   grid-template-columns:auto 1fr auto auto auto;
-  align-items:center;cursor:pointer;transition:all .15s}
-.rr:hover{border-color:var(--b2);background:var(--s2)}
-.rr.c{border-left:3px solid #ef4444}.rr.h{border-left:3px solid #f97316}
-.rr.m{border-left:3px solid #f59e0b}.rr.l{border-left:3px solid #22c55e}
-.rid{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--t2);white-space:nowrap}
+  align-items:center;cursor:pointer;transition:background .1s}
+.rl .rr:first-child{border-top:1px solid var(--b1);border-radius:3px 3px 0 0}
+.rl .rr:last-child{border-radius:0 0 3px 3px}
+.rr:hover{background:var(--s2)}
+.rr.c{border-left:3px solid var(--rd)}.rr.h{border-left:3px solid var(--rd)}
+.rr.m{border-left:3px solid var(--am)}.rr.l{border-left:3px solid var(--gr)}
+.rid{font-family:var(--font-mono);font-size:10px;font-weight:500;color:var(--t2);white-space:nowrap}
 .rcat{font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rprev{font-size:11px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rtime{font-size:10px;color:var(--t3);white-space:nowrap;font-family:'JetBrains Mono',monospace}
+.rtime{font-size:10px;color:var(--t3);white-space:nowrap;font-family:var(--font-mono)}
 @media(max-width:650px){.rr{grid-template-columns:1fr auto;}.rid,.rtime{display:none}}
 .msgs{display:flex;flex-direction:column;gap:12px;margin:16px 0;max-height:320px;overflow-y:auto;padding-right:4px}
 .msgs::-webkit-scrollbar{width:3px}.msgs::-webkit-scrollbar-track{background:transparent}
 .msgs::-webkit-scrollbar-thumb{background:var(--b1);border-radius:2px}
-.mb{max-width:88%;padding:11px 14px;border-radius:10px;font-size:13px;line-height:1.55}
+.mb{max-width:88%;padding:11px 14px;border-radius:3px;font-size:13px;line-height:1.55}
 .mb.ccu{background:var(--pr-dim);border:1px solid var(--pr-b);align-self:flex-start}
-.mb.rep{background:var(--s3);border:1px solid var(--b2);align-self:flex-end}
-.mm{font-size:9px;color:var(--t3);margin-top:4px;font-family:'JetBrains Mono',monospace}
-.msrc{font-size:10px;font-weight:700;letter-spacing:.04em;margin-bottom:4px;text-transform:uppercase}
+.mb.rep{background:var(--s2);border:1px solid var(--b1);align-self:flex-end}
+.mm{font-size:9px;color:var(--t3);margin-top:4px;font-family:var(--font-mono)}
+.msrc{font-size:10px;font-weight:600;letter-spacing:.02em;margin-bottom:4px;text-transform:uppercase}
 .bc-item{background:var(--s1);border:1px solid var(--b1);border-left:3px solid var(--pr);
-  border-radius:8px;padding:12px 15px;margin-bottom:8px}
+  border-radius:3px;padding:12px 15px;margin-bottom:8px}
 .bc-c{font-size:13px;line-height:1.55;color:var(--t1);margin-bottom:5px}
-.bc-t{font-size:9px;color:var(--t3);font-family:'JetBrains Mono',monospace}
+.bc-t{font-size:9px;color:var(--t3);font-family:var(--font-mono)}
 .fbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
-.fb{padding:4px 11px;border-radius:6px;font-size:10px;font-weight:700;
-  font-family:'JetBrains Mono',monospace;letter-spacing:.04em;cursor:pointer;
-  transition:all .15s;border:1px solid var(--b1);background:transparent;color:var(--t2)}
+.fb{padding:4px 11px;border-radius:3px;font-size:10px;font-weight:600;
+  font-family:var(--font-mono);letter-spacing:.02em;cursor:pointer;
+  transition:background .15s;border:1px solid var(--b1);background:transparent;color:var(--t2)}
 .fb.on,.fb:hover{background:var(--pr-dim);border-color:var(--pr-b);color:var(--pr)}
 .lb{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:22px;align-items:center}
-.lng{padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;
-  border:1px solid var(--b1);background:transparent;color:var(--t2);transition:all .15s}
+.lng{padding:4px 10px;border-radius:3px;font-size:12px;cursor:pointer;
+  border:1px solid var(--b1);background:transparent;color:var(--t2);transition:background .15s}
 .lng.on{background:var(--s3);border-color:var(--b2);color:var(--t1)}
 .dash-g{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
 @media(max-width:860px){.dash-g{grid-template-columns:1fr}}
 .dg{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:18px}
 @media(max-width:560px){.dg{grid-template-columns:1fr}}
-.di{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:11px 13px}
-.dk{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
+.di{background:var(--s2);border:1px solid var(--b1);border-radius:3px;padding:11px 13px}
+.dk{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
 .dv{font-size:13px;color:var(--t1);font-weight:500}
-.rp-b{background:var(--s2);border:1px solid var(--b1);border-radius:8px;
+.rp-b{background:var(--s2);border:1px solid var(--b1);border-radius:3px;
   padding:15px;font-size:13px;line-height:1.68;color:var(--t1);
   margin-bottom:18px;white-space:pre-wrap;max-height:220px;overflow-y:auto}
 .rp-b::-webkit-scrollbar{width:3px}.rp-b::-webkit-scrollbar-thumb{background:var(--b1)}
-.sec{font-family:'Calibri Condensed',Calibri;font-size:14px;font-weight:700;
-  letter-spacing:.1em;text-transform:uppercase;color:var(--t2);
+.sec{font-family:var(--font-serif);font-size:15px;font-weight:600;
+  text-transform:none;color:var(--t1);
   margin-bottom:14px;display:flex;align-items:center;gap:7px}
 .tag{display:inline-block;padding:2px 7px;border-radius:3px;font-size:9px;
-  font-weight:600;font-family:'JetBrains Mono',monospace;
-  background:rgba(91,127,255,.1);border:1px solid rgba(91,127,255,.22);color:#818cf8;
-  letter-spacing:.04em;margin:2px}
-.ccu-b{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;
-  letter-spacing:.1em;padding:2px 7px;border-radius:3px;
-  background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.28);
-  color:#f97316;text-transform:uppercase}
-.empty{text-align:center;padding:36px 20px;color:var(--t3);font-size:13px}
-.empty-i{font-size:30px;margin-bottom:10px}
+  font-weight:500;font-family:var(--font-mono);
+  background:var(--pr-dim);border:1px solid var(--pr-b);color:var(--am);
+  margin:2px}
+.ccu-b{font-family:var(--font-mono);font-size:8px;font-weight:600;
+  letter-spacing:.04em;padding:2px 7px;border-radius:3px;
+  background:var(--s3);border:1px solid var(--b1);
+  color:var(--t1);text-transform:uppercase}
+.empty{text-align:left;padding:32px 0;color:var(--t3);font-size:13px}
+.empty-i{font-size:26px;margin-bottom:10px}
 .cbr{display:flex;align-items:flex-start;gap:11px;cursor:pointer;margin-top:11px}
-.dropzone{border:2px dashed var(--b2);border-radius:10px;padding:24px 20px;
-  text-align:center;cursor:pointer;transition:all .2s;background:var(--s2);margin-bottom:18px}
+.dropzone{border:2px dashed var(--b1);border-radius:3px;padding:24px 20px;
+  text-align:center;cursor:pointer;transition:border-color .15s,background .15s;background:var(--s2);margin-bottom:18px}
 .dropzone:hover,.dropzone.drag{border-color:var(--pr);background:var(--pr-dim)}
-.dropzone-i{font-size:28px;margin-bottom:8px}
+.dropzone-i{font-size:26px;margin-bottom:8px}
 .dropzone-t{font-size:13px;color:var(--t2);margin-bottom:4px}
 .dropzone-s{font-size:11px;color:var(--t3)}
 .file-list{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
 .file-item{display:flex;align-items:center;gap:10px;background:var(--s2);
-  border:1px solid var(--b1);border-radius:8px;padding:9px 12px}
+  border:1px solid var(--b1);border-radius:3px;padding:9px 12px}
 .file-ic{font-size:18px;flex-shrink:0}
 .file-info{flex:1;min-width:0}
 .file-name{font-size:12px;font-weight:600;color:var(--t1);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.file-size{font-size:10px;color:var(--t3);font-family:'Calibri',sans-serif}
+.file-size{font-size:10px;color:var(--t3);font-family:var(--font-sans)}
 .file-rm{background:none;border:none;color:var(--t3);cursor:pointer;
   font-size:16px;padding:0 4px;transition:color .15s;flex-shrink:0}
-.file-rm:hover{color:#ef4444}
-.file-err{font-size:11px;color:#ef4444;margin-bottom:10px;
-  background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);
-  border-radius:6px;padding:8px 12px}.cbr input{margin-top:2px;accent-color:var(--pr)}
+.file-rm:hover{color:var(--rd)}
+.file-err{font-size:11px;color:var(--rd);margin-bottom:10px;
+  background:#F0E1E1;border:1px solid var(--rd);
+  border-radius:3px;padding:8px 12px}.cbr input{margin-top:2px;accent-color:var(--pr)}
 .cbr span{font-size:13px;color:var(--t2);line-height:1.45}
 .dvdr{height:1px;background:var(--b1);margin:22px 0}
-.spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+.spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);
   border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
 .sc{max-height:440px;overflow-y:auto;padding-right:2px}
 .sc::-webkit-scrollbar{width:3px}.sc::-webkit-scrollbar-thumb{background:var(--b1)}
+
+/* ---- shared semantic badge (see ccu-theme.css) ---- */
+.badge{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;
+  border-radius:3px;font-size:11px;font-weight:500;font-family:var(--font-mono);
+  border-left:3px solid transparent;white-space:nowrap}
+.badge-low{background:#E4EEEC;color:var(--gr);border-color:var(--gr)}
+.badge-medium{background:#F3E9DC;color:var(--am);border-color:var(--am)}
+.badge-high,.badge-critical{background:#F0E1E1;color:var(--rd);border-color:var(--rd)}
+.badge-closed{background:#E7E7E4;color:var(--t2);border-color:var(--t2)}
+.badge-new,.badge-review{background:var(--s3);color:var(--t1);border-color:var(--b2)}
 `;
 
 // ─── Main App ──────────────────────────────────────────────────────────────────
@@ -634,7 +654,7 @@ export default function App() {
         <div className="page" style={{ maxWidth: 680, textAlign: "center" }}>
           <LB />
           <div style={{ paddingBottom: 8 }}>
-            <div style={{ fontFamily: "'Calibri Condensed',Calibri", fontSize: "clamp(32px,5vw,52px)", fontWeight: 800, letterSpacing: ".1em", marginBottom: 10 }}>{t.appName}</div>
+            <div style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(32px,5vw,52px)", fontWeight: 600, letterSpacing: ".1em", marginBottom: 10 }}>{t.appName}</div>
             <div style={{ fontSize: 14, color: "var(--t2)", letterSpacing: ".04em", marginBottom: 12 }}>{t.tagline}</div>
             <div style={{ fontSize: 13, color: "var(--t3)", marginBottom: 40 }}>{t.chooseRole}</div>
           </div>
@@ -642,11 +662,11 @@ export default function App() {
             {[
               { icon: "🛡️", title: t.reporterTitle, sub: t.reporterSub, action: () => setView("submit"), border: "var(--pr)" },
              ].map((c, i) => (
-              <div key={i} onClick={c.action} style={{ background: "var(--s1)", border: `1px solid var(--b1)`, borderRadius: 12, padding: "26px 22px", cursor: "pointer", textAlign: "left", transition: "all .2s" }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = c.border; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 28px ${c.border}22`; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--b1)"; e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
+              <div key={i} onClick={c.action} style={{ background: "var(--s1)", border: `1px solid var(--b1)`, borderRadius: 3, padding: "26px 22px", cursor: "pointer", textAlign: "left", transition: "background .15s" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "var(--s2)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "var(--s1)"; }}>
                 <div style={{ fontSize: 28, marginBottom: 12 }}>{c.icon}</div>
-                <div style={{ fontFamily: "'Calibri Condensed',Calibri", fontSize: 19, fontWeight: 700, letterSpacing: ".05em", marginBottom: 5 }}>{c.title}</div>
+                <div style={{ fontFamily: "var(--font-serif)", fontSize: 19, fontWeight: 700, letterSpacing: ".05em", marginBottom: 5 }}>{c.title}</div>
                 <div style={{ fontSize: 12, color: "var(--t2)" }}>{c.sub}</div>
               </div>
             ))}
@@ -665,13 +685,13 @@ export default function App() {
         <div className="page">
           <button className="back" onClick={() => setView("landing")}>← {t.back}</button>
           <LB />
-          <div style={{ fontFamily: "'Calibri Condensed',Calibri", fontSize: 26, fontWeight: 800, letterSpacing: ".07em", marginBottom: 22 }}>🛡️ {t.submitReport}</div>
+          <div style={{ fontFamily: "var(--font-serif)", fontSize: 26, fontWeight: 600, letterSpacing: ".07em", marginBottom: 22 }}>🛡️ {t.submitReport}</div>
           <div className="priv"><span>🔒</span><span>Your identity is not recorded. This report is encrypted in transit. No IP addresses, cookies, or personal identifiers are stored or logged by this system.</span></div>
           <div className="card">
             <div className="fg">
               <label className="lbl">{t.description} *</label>
               <textarea className="ta" style={{ minHeight: 175 }} placeholder={t.descPlaceholder} value={draft.content} onChange={e => setDraft(d => ({ ...d, content: e.target.value }))} />
-              <div style={{ fontSize: 10, color: draft.content.length < 20 ? "var(--am)" : "var(--t3)", marginTop: 5, fontFamily: "'JetBrains Mono',monospace" }}>
+              <div style={{ fontSize: 10, color: draft.content.length < 20 ? "var(--am)" : "var(--t3)", marginTop: 5, fontFamily: "var(--font-mono)" }}>
                 {draft.content.length} chars {draft.content.length < 20 ? `(min 20)` : "✓"}
               </div>
             </div>
@@ -689,7 +709,7 @@ export default function App() {
             <button className="btn btn-g" onClick={() => { setDraftMsg(t.saveDraft + " ✓"); setTimeout(() => setDraftMsg(""), 2500); }}>💾 {t.saveDraft}</button>
           </div>
           {loading && <div style={{ marginTop: 14, padding: "11px 15px", background: "var(--s2)", border: "1px solid var(--b1)", borderRadius: 8, fontSize: 12, color: "var(--t2)", display: "flex", alignItems: "center", gap: 9 }}>
-            <div className="spin" style={{ borderColor: "rgba(245,158,11,.3)", borderTopColor: "#f59e0b" }} /> {t.assessingRisk}…
+            <div className="spin" style={{ borderColor: "var(--pr-dim)", borderTopColor: "var(--pr)" }} /> {t.assessingRisk}…
           </div>}
         </div>
       </main>
@@ -705,7 +725,7 @@ export default function App() {
         <main className="main">
           <div className="page" style={{ maxWidth: 560, textAlign: "center" }}>
             <div style={{ fontSize: 44, marginBottom: 12 }}>✅</div>
-            <div style={{ fontFamily: "'Calibri Condensed',Calibri", fontSize: 28, fontWeight: 800, letterSpacing: ".07em", marginBottom: 8 }}>Report Received</div>
+            <div style={{ fontFamily: "var(--font-serif)", fontSize: 28, fontWeight: 600, letterSpacing: ".07em", marginBottom: 8 }}>Report Received</div>
             <div style={{ fontSize: 13, color: "var(--t2)", marginBottom: 28 }}>Your report has been securely submitted and assigned for review.</div>
             <div className="token-box">
               <div style={{ fontSize: 10, letterSpacing: ".09em", textTransform: "uppercase", color: "var(--t2)", fontWeight: 600, marginBottom: 9 }}>{t.yourToken}</div>
@@ -713,11 +733,11 @@ export default function App() {
               <div className="token-n">⚠️ {t.tokenInstr}</div>
             </div>
             {r && (
-              <div style={{ background: RISK_CONFIG[r.riskLevel]?.bg, border: `1px solid ${RISK_CONFIG[r.riskLevel]?.border}`, borderRadius: 10, padding: "16px 20px", marginBottom: 22, textAlign: "left" }}>
+              <div style={{ background: RISK_CONFIG[r.riskLevel]?.bg, border: `1px solid ${RISK_CONFIG[r.riskLevel]?.border}`, borderRadius: 3, padding: "16px 20px", marginBottom: 22, textAlign: "left" }}>
                 <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--t2)", marginBottom: 9 }}>🤖 {t.riskLabel}</div>
                 <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 9, flexWrap: "wrap" }}>
                   <RiskBadge level={r.riskLevel} />
-                  {r.urgency && <span style={{ fontSize: 10, color: "var(--t2)", fontFamily: "'JetBrains Mono',monospace" }}>⏱ {r.urgency}</span>}
+                  {r.urgency && <span style={{ fontSize: 10, color: "var(--t2)", fontFamily: "var(--font-mono)" }}>⏱ {r.urgency}</span>}
                   {r.keywords?.map(k => <span key={k} className="tag">{k}</span>)}
                 </div>
                 <div style={{ fontSize: 13, color: "var(--t1)", lineHeight: 1.5 }}>{r.riskReason}</div>
@@ -740,18 +760,18 @@ export default function App() {
       <main className="main">
         <div className="page" style={{ maxWidth: 460 }}>
           <button className="back" onClick={() => setView("landing")}>← {t.back}</button>
-          <div style={{ fontFamily: "'Calibri Condensed',Calibri", fontSize: 24, fontWeight: 800, letterSpacing: ".07em", marginBottom: 6 }}>📬 Anonymous Inbox</div>
+          <div style={{ fontFamily: "var(--font-serif)", fontSize: 24, fontWeight: 600, letterSpacing: ".07em", marginBottom: 6 }}>📬 Anonymous Inbox</div>
           <div style={{ fontSize: 13, color: "var(--t2)", marginBottom: 26 }}>{t.enterToken}</div>
           <div className="card">
             <div className="fg">
               <label className="lbl">{t.tokenLabel}</label>
-              <input className="inp" placeholder="RPT-XXXX-XXXX" value={tokIn} onChange={e => { setTokIn(e.target.value); setTokErr(false); }} style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 16, letterSpacing: ".1em" }} onKeyDown={e => e.key === "Enter" && handleInbox()} />
-              {tokErr && <div style={{ color: "#ef4444", fontSize: 11, marginTop: 6 }}>⚠️ Token not found. Please check and try again.</div>}
+              <input className="inp" placeholder="RPT-XXXX-XXXX" value={tokIn} onChange={e => { setTokIn(e.target.value); setTokErr(false); }} style={{ fontFamily: "var(--font-mono)", fontSize: 16, letterSpacing: ".1em" }} onKeyDown={e => e.key === "Enter" && handleInbox()} />
+              {tokErr && <div style={{ color: "var(--rd)", fontSize: 11, marginTop: 6 }}>⚠️ Token not found. Please check and try again.</div>}
             </div>
             <button className="btn btn-p" onClick={handleInbox} disabled={!tokIn.trim()}>🔍 {t.viewMessages}</button>
           </div>
           <div style={{ fontSize: 11, color: "var(--t3)", textAlign: "center", marginTop: 14 }}>
-            Demo token: <span style={{ fontFamily: "'JetBrains Mono',monospace", color: "var(--t2)" }}>RPT-7823-XKQP</span>
+            Demo token: <span style={{ fontFamily: "var(--font-mono)", color: "var(--t2)" }}>RPT-7823-XKQP</span>
           </div>
         </div>
       </main>
@@ -769,8 +789,8 @@ export default function App() {
         <main className="main">
           <div className="page" style={{ maxWidth: 620 }}>
             <button className="back" onClick={() => setView("inbox-entry")}>← {t.back}</button>
-            <div style={{ fontFamily: "'Calibri Condensed',Calibri", fontSize: 22, fontWeight: 800, letterSpacing: ".07em", marginBottom: 4 }}>📬 {lang === "en" ? "Your Inbox" : lang === "es" ? "Tu Bandeja" : lang === "fr" ? "Votre Boîte" : lang === "pl" ? "Twoja Skrzynka" : "آپ کا ان باکس"}</div>
-            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "var(--t2)", marginBottom: 22, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <div style={{ fontFamily: "var(--font-serif)", fontSize: 22, fontWeight: 600, letterSpacing: ".07em", marginBottom: 4 }}>📬 {lang === "en" ? "Your Inbox" : lang === "es" ? "Tu Bandeja" : lang === "fr" ? "Votre Boîte" : lang === "pl" ? "Twoja Skrzynka" : "آپ کا ان باکس"}</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--t2)", marginBottom: 22, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
               {report.token} · <StatusBadge status={report.status} />
             </div>
             <div className="card">
@@ -818,20 +838,20 @@ export default function App() {
       <main className="main">
         <div className="page" style={{ maxWidth: 400 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 13, marginBottom: 26 }}>
-            <div style={{ width: 42, height: 42, background: "rgba(249,115,22,.12)", border: "1px solid rgba(249,115,22,.28)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>🔐</div>
+            <div style={{ width: 42, height: 42, background: "var(--s3)", border: "1px solid var(--b1)", borderRadius: 3, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>🔐</div>
             <div>
-              <div style={{ fontFamily: "'Calibri Condensed',Calibri", fontSize: 21, fontWeight: 800, letterSpacing: ".06em" }}>{t.ccuLoginTitle}</div>
+              <div style={{ fontFamily: "var(--font-serif)", fontSize: 21, fontWeight: 600, letterSpacing: ".06em" }}>{t.ccuLoginTitle}</div>
               <div style={{ fontSize: 11, color: "var(--t2)" }}>{t.ccuSub}</div>
             </div>
           </div>
           <div className="card">
             <div className="fg">
               <label className="lbl">{t.ccuPassword}</label>
-              <input className="inp" type="password" placeholder="Enter access code" value={pw} onChange={e => { setPw(e.target.value); setPwErr(false); }} style={{ fontFamily: "'JetBrains Mono',monospace", letterSpacing: ".12em" }} onKeyDown={e => e.key === "Enter" && handleLogin()} />
-              {pwErr && <div style={{ color: "#ef4444", fontSize: 11, marginTop: 6 }}>⚠️ {t.invalidPassword}</div>}
+              <input className="inp" type="password" placeholder="Enter access code" value={pw} onChange={e => { setPw(e.target.value); setPwErr(false); }} style={{ fontFamily: "var(--font-mono)", letterSpacing: ".12em" }} onKeyDown={e => e.key === "Enter" && handleLogin()} />
+              {pwErr && <div style={{ color: "var(--rd)", fontSize: 11, marginTop: 6 }}>⚠️ {t.invalidPassword}</div>}
             </div>
             <button className="btn btn-p" onClick={handleLogin}>🔓 {t.ccuAccess}</button>
-            <div style={{ fontSize: 10, color: "var(--t3)", marginTop: 11, fontFamily: "'JetBrains Mono',monospace" }}>Demo: CCU2024</div>
+            <div style={{ fontSize: 10, color: "var(--t3)", marginTop: 11, fontFamily: "var(--font-mono)" }}>Demo: CCU2024</div>
           </div>
         </div>
       </main>
@@ -852,8 +872,8 @@ export default function App() {
         <div className="page-w">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
             <div>
-              <div style={{ fontFamily: "'Calibri Condensed',Calibri", fontSize: 24, fontWeight: 800, letterSpacing: ".08em", marginBottom: 4 }}>🔒 {t.dashboard}</div>
-              <div style={{ fontSize: 11, color: "var(--t2)", fontFamily: "'JetBrains Mono',monospace", display: "flex", alignItems: "center" }}>
+              <div style={{ fontFamily: "var(--font-serif)", fontSize: 24, fontWeight: 600, letterSpacing: ".08em", marginBottom: 4 }}>🔒 {t.dashboard}</div>
+              <div style={{ fontSize: 11, color: "var(--t2)", fontFamily: "var(--font-mono)", display: "flex", alignItems: "center" }}>
                 <Dot />{lang === "en" ? "System Online" : "En línea"} · {new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
               </div>
             </div>
@@ -920,10 +940,10 @@ export default function App() {
             <button className="back" onClick={() => setView("ccu-dash")}>← {t.dashboard}</button>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 22, flexWrap: "wrap", gap: 12 }}>
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "var(--t2)", marginBottom: 5 }}>{report.id}</div>
-                <div style={{ fontFamily: "'Calibri Condensed',Calibri", fontSize: 22, fontWeight: 800, letterSpacing: ".05em", marginBottom: 6 }}>{report.category}</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--t2)", marginBottom: 5 }}>{report.id}</div>
+                <div style={{ fontFamily: "var(--font-serif)", fontSize: 22, fontWeight: 600, letterSpacing: ".05em", marginBottom: 6 }}>{report.category}</div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono',monospace", color: "var(--t3)", letterSpacing: ".05em", textTransform: "uppercase" }}>Auto-detected</span>
+                  <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--t3)", letterSpacing: ".05em", textTransform: "uppercase" }}>Auto-detected</span>
                   <select style={{ fontSize: 11, padding: "3px 8px", background: "var(--s2)", border: "1px solid var(--b1)", borderRadius: 5, color: "var(--t1)", cursor: "pointer" }} value={report.category} onChange={e => handleRepCategory(report.id, e.target.value)}>
                     {CATEGORIES.map(c => <option key={c.id} value={c.label}>{c.label}</option>)}
                   </select>
@@ -939,11 +959,11 @@ export default function App() {
               <div className="di"><div className="dk">Broadcast Opt-In</div><div className="dv">{report.broadcastOptIn ? "✅ Yes" : "❌ No"}</div></div>
               <div className="di"><div className="dk">Messages</div><div className="dv">{report.messages.length} message{report.messages.length !== 1 ? "s" : ""}</div></div>
             </div>
-            <div style={{ background: RISK_CONFIG[report.riskLevel]?.bg, border: `1px solid ${RISK_CONFIG[report.riskLevel]?.border}`, borderRadius: 10, padding: "15px 18px", marginBottom: 18 }}>
+            <div style={{ background: RISK_CONFIG[report.riskLevel]?.bg, border: `1px solid ${RISK_CONFIG[report.riskLevel]?.border}`, borderRadius: 3, padding: "15px 18px", marginBottom: 18 }}>
               <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--t2)", marginBottom: 9 }}>🤖 {t.riskLabel}</div>
               <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 9, flexWrap: "wrap" }}>
                 <RiskBadge level={report.riskLevel} />
-                {report.urgency && <span style={{ fontSize: 10, color: "var(--t2)", fontFamily: "'JetBrains Mono',monospace" }}>⏱ {report.urgency}</span>}
+                {report.urgency && <span style={{ fontSize: 10, color: "var(--t2)", fontFamily: "var(--font-mono)" }}>⏱ {report.urgency}</span>}
                 {report.keywords?.map(k => <span key={k} className="tag">{k}</span>)}
               </div>
               <div style={{ fontSize: 13, color: "var(--t1)", lineHeight: 1.5 }}>{report.riskReason}</div>
