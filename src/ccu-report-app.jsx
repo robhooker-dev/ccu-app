@@ -15,14 +15,6 @@ const CATEGORIES = [
   { id: "other", label: "Other Serious Corruption", icon: "📋" },
 ];
 
-const LANGUAGES = [
-  { code: "en", label: "EN", full: "English" },
-  { code: "es", label: "ES", full: "Español" },
-  { code: "fr", label: "FR", full: "Français" },
-  { code: "pl", label: "PL", full: "Polski" },
-  { code: "ur", label: "UR", full: "اردو" },
-];
-
 const T = {
   en: {
     appName: "SHIELD REPORT", tagline: "Secure · Anonymous · Confidential",
@@ -342,7 +334,7 @@ const CSS = `
   --bg:#F1F0EC;--s1:#F7F6F3;--s2:#EDEBE5;--s3:#EAE8E2;
   --b1:#C7C2B8;--b2:#AFA89A;
   --t1:#1B1F23;--t2:#5B6472;--t3:#7D7666;
-  --ink:#14213D;
+  --ink:#1D3358;
   --pr:#B8752A;--pr-dim:rgba(184,117,42,.10);--pr-b:rgba(184,117,42,.35);
   --am:#96601F;--rd:#8B2E2E;--gr:#2F6F62;
   --font-serif:'Source Serif 4',Georgia,serif;
@@ -359,7 +351,7 @@ button{font-family:var(--font-sans)}
   background:var(--ink);border-bottom:1px solid var(--ink);padding:0 20px;
   display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:9px;cursor:pointer;
-  font-family:var(--font-serif);font-size:17px;
+  font-family:var(--font-sans);font-size:17px;
   font-weight:600;color:#fff}
 .logo-ic{width:26px;height:26px;background:#fff;
   border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:13px}
@@ -445,10 +437,6 @@ select option{background:#fff}
   font-family:var(--font-mono);letter-spacing:.02em;cursor:pointer;
   transition:background .15s;border:1px solid var(--b1);background:transparent;color:var(--t2)}
 .fb.on,.fb:hover{background:var(--pr-dim);border-color:var(--pr-b);color:var(--pr)}
-.lb{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:22px;align-items:center}
-.lng{padding:4px 10px;border-radius:3px;font-size:12px;cursor:pointer;
-  border:1px solid var(--b1);background:transparent;color:var(--t2);transition:background .15s}
-.lng.on{background:var(--s3);border-color:var(--b2);color:var(--t1)}
 .dash-g{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
 @media(max-width:860px){.dash-g{grid-template-columns:1fr}}
 .dg{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:18px}
@@ -518,7 +506,6 @@ export default function App() {
   const [view, setView] = useState(() => {
     return window.location.hash === '#ccu-login' ? "ccu-login" : "landing";
   });
-  const [lang, setLang] = useState("en");
   const [reports, setReports] = useState(SEED_REPORTS);
   const [broadcasts, setBroadcasts] = useState(SEED_BROADCASTS);
   const [sel, setSel] = useState(null);
@@ -536,7 +523,7 @@ export default function App() {
   const [filter, setFilter] = useState("ALL");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const t = T[lang] || T.en;
+  const t = T.en;
 
   // ── AI Risk Assessment ────────────────────────────────────────────────────────
   const assessRisk = async (content) => {
@@ -586,7 +573,7 @@ export default function App() {
     setSubmitting(true);
     const risk = await assessRisk(draft.content);
     const token = genToken();
-    const r = { id: token, token, timestamp: new Date(), category: risk.category || "Other Serious Corruption", content: draft.content, files: draft.files, riskLevel: risk.riskLevel, riskReason: risk.riskReason, urgency: risk.urgency, keywords: risk.keywords || [], status: "New", messages: [], broadcastOptIn: draft.optIn, language: lang };
+    const r = { id: token, token, timestamp: new Date(), category: risk.category || "Other Serious Corruption", content: draft.content, files: draft.files, riskLevel: risk.riskLevel, riskReason: risk.riskReason, urgency: risk.urgency, keywords: risk.keywords || [], status: "New", messages: [], broadcastOptIn: draft.optIn };
     setReports(prev => [r, ...prev]);
     setNewTok(token);
     setDraft({ category: "", content: "", optIn: false });
@@ -630,17 +617,6 @@ export default function App() {
   const filtered = filter === "ALL" ? reports : reports.filter(r => r.riskLevel === filter);
   const stats = { total: reports.length, open: reports.filter(r => r.status !== "Closed").length, crit: reports.filter(r => r.riskLevel === "CRITICAL").length };
 
-  // ── Language Bar ──────────────────────────────────────────────────────────────
-  const LB = () => (
-  <div className="lb">
-    {LANGUAGES.map(l => (
-      <button key={l.code} className={`lng ${lang === l.code ? "on" : ""}`} onClick={() => setLang(l.code)}>
-        {l.label}
-      </button>
-    ))}
-  </div>
-);
-
   // ── VIEWS ─────────────────────────────────────────────────────────────────────
 
   // Landing
@@ -652,9 +628,8 @@ export default function App() {
       </header>
       <main className="main">
         <div className="page" style={{ maxWidth: 680, textAlign: "center" }}>
-          <LB />
           <div style={{ paddingBottom: 8 }}>
-            <div style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(32px,5vw,52px)", fontWeight: 600, letterSpacing: ".1em", marginBottom: 10 }}>{t.appName}</div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "clamp(32px,5vw,52px)", fontWeight: 600, letterSpacing: ".1em", marginBottom: 10 }}>{t.appName}</div>
             <div style={{ fontSize: 14, color: "var(--t2)", letterSpacing: ".04em", marginBottom: 12 }}>{t.tagline}</div>
             <div style={{ fontSize: 13, color: "var(--t3)", marginBottom: 40 }}>{t.chooseRole}</div>
           </div>
@@ -684,7 +659,6 @@ export default function App() {
       <main className="main">
         <div className="page">
           <button className="back" onClick={() => setView("landing")}>← {t.back}</button>
-          <LB />
           <div style={{ fontFamily: "var(--font-serif)", fontSize: 26, fontWeight: 600, letterSpacing: ".07em", marginBottom: 22 }}>🛡️ {t.submitReport}</div>
           <div className="priv"><span>🔒</span><span>Your identity is not recorded. This report is encrypted in transit. No IP addresses, cookies, or personal identifiers are stored or logged by this system.</span></div>
           <div className="card">
@@ -789,7 +763,7 @@ export default function App() {
         <main className="main">
           <div className="page" style={{ maxWidth: 620 }}>
             <button className="back" onClick={() => setView("inbox-entry")}>← {t.back}</button>
-            <div style={{ fontFamily: "var(--font-serif)", fontSize: 22, fontWeight: 600, letterSpacing: ".07em", marginBottom: 4 }}>📬 {lang === "en" ? "Your Inbox" : lang === "es" ? "Tu Bandeja" : lang === "fr" ? "Votre Boîte" : lang === "pl" ? "Twoja Skrzynka" : "آپ کا ان باکس"}</div>
+            <div style={{ fontFamily: "var(--font-serif)", fontSize: 22, fontWeight: 600, letterSpacing: ".07em", marginBottom: 4 }}>📬 Your Inbox</div>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--t2)", marginBottom: 22, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
               {report.token} · <StatusBadge status={report.status} />
             </div>
@@ -874,7 +848,7 @@ export default function App() {
             <div>
               <div style={{ fontFamily: "var(--font-serif)", fontSize: 24, fontWeight: 600, letterSpacing: ".08em", marginBottom: 4 }}>🔒 {t.dashboard}</div>
               <div style={{ fontSize: 11, color: "var(--t2)", fontFamily: "var(--font-mono)", display: "flex", alignItems: "center" }}>
-                <Dot />{lang === "en" ? "System Online" : "En línea"} · {new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                <Dot />System Online · {new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
               </div>
             </div>
           </div>
@@ -911,7 +885,7 @@ export default function App() {
               </div>
               {broadcasts.length > 0 && (
                 <div>
-                  <div className="sec">{lang === "en" ? "Recent Broadcasts" : "Recientes"}</div>
+                  <div className="sec">Recent Broadcasts</div>
                   {broadcasts.slice(0, 3).map(b => <div key={b.id} className="bc-item"><div className="bc-c">{b.content.substring(0, 120)}{b.content.length > 120 ? "…" : ""}</div><div className="bc-t">{fmt(b.timestamp)}</div></div>)}
                 </div>
               )}
@@ -955,7 +929,6 @@ export default function App() {
             </div>
             <div className="dg">
               <div className="di"><div className="dk">Submitted</div><div className="dv">{fmt(report.timestamp)}</div></div>
-              <div className="di"><div className="dk">Language</div><div className="dv">{LANGUAGES.find(l => l.code === report.language)?.flag} {LANGUAGES.find(l => l.code === report.language)?.label || "English"}</div></div>
               <div className="di"><div className="dk">Broadcast Opt-In</div><div className="dv">{report.broadcastOptIn ? "✅ Yes" : "❌ No"}</div></div>
               <div className="di"><div className="dk">Messages</div><div className="dv">{report.messages.length} message{report.messages.length !== 1 ? "s" : ""}</div></div>
             </div>
